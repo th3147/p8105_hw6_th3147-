@@ -37,7 +37,7 @@ extract_stats_vector <- function(model) {
 ```{r}
 bootstrap_results <- 
   weather_df |> 
-  modelr::bootstrap(n = 50) |> 
+  modelr::bootstrap(n = 5000) |> 
   mutate(
     stats = map(strap, 
                 ~ lm(tmax ~ tmin + prcp, data = as_tibble(.)) |> 
@@ -58,7 +58,7 @@ bootstrap_plot <-
     values_to = "estimate"
   ) |> 
   ggplot(aes(x = estimate)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 50, fill = "lightblue", color = "white") +
+  geom_histogram(aes(y = after_stat(density)), bins = 50, fill = "lightblue") +
   geom_density(color = "red", linewidth = 1) +
   facet_wrap(~ statistic, scales = "free") +
   labs(
@@ -68,5 +68,26 @@ bootstrap_plot <-
   )
 
 bootstrap_plot
+```
+
+* The R-squared plot appears approximately normally distributed, whereas the ratio of beta1 to beta2 plot shows a negatively skewed distribution.
+
+### Calculate 95%CI
+```{r}
+summary_stats <- 
+  bootstrap_results |> 
+  pivot_longer(
+    cols = c(r_squared, ratio_tmin_prcp.tmin),
+    names_to = "statistic",
+    values_to = "estimate"
+  ) |> 
+  group_by(statistic) |> 
+  summarize(
+    boot_se = sd(estimate),
+    ci_lower = quantile(estimate, 0.025),
+    ci_upper = quantile(estimate, 0.975)
+  )
+
+summary_stats
 ```
 
