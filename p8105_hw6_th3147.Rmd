@@ -166,4 +166,27 @@ residuals_plot
   
   * Model 3: The most complex model, including head circumference, length, and sex, along with all possible two-way and the three-way interactions.
 
-* Model Diagnostics: The primary model's assumptions were assessed by plotting the residuals against the fitted values to check for linearity and homoscedasticity.Notably, the residuals are scattered randomly around the dashed red line.
+* Model Diagnostics: The primary model's assumptions were assessed by plotting the residuals against the fitted values to check for linearity and homoscedasticity.Notably, the residuals are scattered randomly around the dashed red line on the above plot.
+
+### Model 2 and 3
+```{r}
+model_two <- lm(bwt ~ blength + gaweeks, data = birthweight_df_clean)
+model_three <- lm(bwt ~ (bhead + blength + babysex)^3, data = birthweight_df_clean)
+```
+
+
+### Model comparsion
+```{r}
+comparison_results <- 
+  list(
+  "Primary_BWT_GA" = model_primary,
+  "Model2_BWT_Length_GA" = model_two,
+  "Model3_BWT_Int_Max" = model_three
+) |> 
+  map_dfr(broom::glance, .id = "Model_Name") |>
+  select(Model_Name, r.squared, adj.r.squared, AIC, BIC, df)
+
+print(comparison_results)
+```
+
+* The table shows the interaction model has the lowest AIC, which represents better model compared to my other model. 
