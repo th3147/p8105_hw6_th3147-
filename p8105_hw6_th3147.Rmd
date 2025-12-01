@@ -155,3 +155,15 @@ residuals_plot <- residual_data_primary |>
 residuals_plot
 ```
 
+* Model processing:
+
+* Objective: The primary goal was to predict Birthweight using various combinations of predictors, and to compare the fit of the simpler models against the most complex one.
+
+* Model Fitting: 
+  * Primary Model: A simple baseline model using only a single, strong physiological predictor, gestational age, as the main effect. 
+  
+  * Model 2: An intermediate model including two established predictors, gestational age and length at Birth.
+  
+  * Model 3: The most complex model, including head circumference, length, and sex, along with all possible two-way and the three-way interactions.
+
+* Model Diagnostics: The primary model's assumptions were assessed by plotting the residuals against the fitted values to check for linearity and homoscedasticity.Notably, the residuals are scattered randomly around the dashed red line.
