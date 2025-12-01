@@ -10,6 +10,9 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(p8105.datasets)
+library(purrr)
+library(modelr)
+library(mgcv)
 ```
 
 ### Loading the data
@@ -189,4 +192,49 @@ comparison_results <-
 print(comparison_results)
 ```
 
-* The table shows the interaction model has the lowest AIC, which represents better model compared to my other model. 
+* The table shows the interaction model has the lowest AIC, which represents better model compared to other models. 
+
+### Make a comparsion through cross-validated prediction
+```{r}
+cv_data <- crossv_mc(birthweight_df_clean, n = 100)
+
+cv_results <- cv_data |> 
+  mutate(
+    M1_model = map(train, \(df) lm(bwt ~ gaweeks, data = df)),
+    M2_model = map(train, \(df) lm(bwt ~ blength + gaweeks, data = df)),
+    M3_model = map(train, \(df) lm(bwt ~ (bhead + blength + babysex)^3, data = df))
+  ) |>
+  mutate(
+    M1_rmse = map2_dbl(M1_model, test, \(mod, df) rmse(model = mod, data = df)),
+    M2_rmse = map2_dbl(M2_model, test, \(mod, df) rmse(model = mod, data = df)),
+    M3_rmse = map2_dbl(M3_model, test, \(mod, df) rmse(model = mod, data = df))
+  )
+
+comparison_cv <- 
+  cv_results |> 
+  select(ends_with("_rmse")) |> 
+  pivot_longer(
+    cols = ends_with("_rmse"), 
+    names_to = "Model", 
+    values_to = "RMSE"
+  ) |> 
+  mutate(
+    Model = case_when(
+      Model == "M1_rmse" ~ "M1_Primary",
+      Model == "M2_rmse" ~ "M2_Additive",
+      Model == "M3_rmse" ~ "M3_Max_Interaction",
+      TRUE ~ Model
+    )
+  ) |>
+  group_by(Model) |> 
+  summarize(
+    Mean_CV_RMSE = mean(RMSE),
+    SD_CV_RMSE = sd(RMSE)
+  ) |>
+  arrange(Mean_CV_RMSE)
+
+comparison_cv
+```
+
+* The model 3 is the best model because it achieved the lowest mean Cross-Validated RMSE.
+
