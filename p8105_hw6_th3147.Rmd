@@ -91,3 +91,44 @@ summary_stats <-
 summary_stats
 ```
 
+# Problem 3
+### Loading the data
+```{r}
+birthweight_df <- read_csv("birthweight.csv")
+```
+
+### Clean the data
+```{r}
+birthweight_df_clean <- 
+  birthweight_df |> 
+  janitor::clean_names() |> 
+  mutate(
+    frace = factor(
+      frace,
+      levels = c(1, 2, 3, 4, 8, 9), 
+      labels = c("White", "Black", "Asian", "Puerto Rican", "Other", "Unknown")
+    ),
+    mrace = factor(
+      mrace,
+      levels = c(1, 2, 3, 4, 8), 
+      labels = c("White", "Black", "Asian", "Puerto Rican", "Other")
+    ),
+    malform = factor(
+      malform, 
+      levels = c(0, 1), 
+      labels = c("absent", "present")
+    )
+  ) |> 
+  rename(prev_live_births = parity) |> 
+  drop_na()
+```
+
+### Check if it is any NA
+```{r}
+missing_summary <- 
+  birthweight_df_clean |> 
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+missing_summary
+```
+
