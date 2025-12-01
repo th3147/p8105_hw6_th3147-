@@ -1,0 +1,72 @@
+---
+title: "p8105_hw6_th3147"
+author: "Te-Hsuan Huang"
+date: "2025-12-01"
+output: github_document
+---
+
+# Problem 2
+### Loading the package
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+```
+
+### Loading the data
+```{r}
+data("weather_df")
+set.seed(1)
+```
+
+### Make a function
+```{r}
+extract_stats_vector <- function(model) {
+  
+  r_squared <- summary(model)$r.squared
+  
+  coeffs <- coef(model)
+  
+  ratio_beta1_beta2 <- coeffs["tmin"] / coeffs["prcp"]
+  
+  c(r_squared = r_squared, ratio_tmin_prcp = ratio_beta1_beta2)
+}
+```
+
+
+### Perform boostrap
+```{r}
+bootstrap_results <- 
+  weather_df |> 
+  modelr::bootstrap(n = 50) |> 
+  mutate(
+    stats = map(strap, 
+                ~ lm(tmax ~ tmin + prcp, data = as_tibble(.)) |> 
+                    extract_stats_vector()
+                )
+  ) |> 
+  unnest_wider(stats) |>
+  select(strap, r_squared, ratio_tmin_prcp.tmin)
+```
+
+### Make a plot
+```{r}
+bootstrap_plot <- 
+  bootstrap_results |> 
+  pivot_longer(
+    cols = c(r_squared, ratio_tmin_prcp.tmin),
+    names_to = "statistic",
+    values_to = "estimate"
+  ) |> 
+  ggplot(aes(x = estimate)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 50, fill = "lightblue", color = "white") +
+  geom_density(color = "red", linewidth = 1) +
+  facet_wrap(~ statistic, scales = "free") +
+  labs(
+    title = "Bootstrap Distributions for R-squared and Beta Ratio",
+    x = "Estimated Value",
+    y = "Density"
+  )
+
+bootstrap_plot
+```
+
