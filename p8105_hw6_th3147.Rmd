@@ -132,3 +132,26 @@ missing_summary <-
 missing_summary
 ```
 
+### Make the first model
+```{r}
+model_primary <- lm(bwt ~ gaweeks, data = birthweight_df_clean)
+
+residual_data_primary <- birthweight_df_clean |>
+  modelr::add_predictions(model_primary) |>
+  modelr::add_residuals(model_primary)
+
+residuals_plot <- residual_data_primary |>
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = 0.6) +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
+  labs(
+    title = "Residuals vs. Fitted Values (Primary Model: BWT ~ GAWEEKS)",
+    x = "Fitted Values (Predicted Birthweight)",
+    y = "Residuals (Error)",
+    caption = "A good model shows a random scatter of residuals around the red dashed line (y=0)."
+  ) +
+  theme_minimal()
+
+residuals_plot
+```
+
