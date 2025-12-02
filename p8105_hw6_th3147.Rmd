@@ -18,6 +18,11 @@ library(mgcv)
 ### Loading the data
 ```{r}
 data("weather_df")
+
+weather_df <- 
+  weather_df |> 
+  filter(name == "CentralPark_NY")
+
 set.seed(1)
 ```
 
