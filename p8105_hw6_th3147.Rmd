@@ -78,7 +78,7 @@ bootstrap_plot <-
 bootstrap_plot
 ```
 
-* The R-squared plot appears approximately normally distributed, whereas the ratio of beta1 to beta2 plot shows a negatively skewed distribution.
+* The R-squared plot generally appears normally distributed, but here looks negatively skewed distribution. In addition, the ratio of beta1 to beta2 plot shows a negatively skewed distribution.
 
 ### Calculate 95%CI
 ```{r}
